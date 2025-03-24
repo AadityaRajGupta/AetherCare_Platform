@@ -1,5 +1,9 @@
+<p align="center">
+  <img src="logo.png" alt="AetherCare Logo" width="80">
+</p>
+
 # AetherCare: Transforming Healthcare with Generative Intelligence  
-![AetherCare](https://image-url-need-to-update.com)  
+
 
 ### **Empowering Healthcare with AI-driven Insights**  
 

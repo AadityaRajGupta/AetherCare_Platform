@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <title>AetherCare - Blog</title>
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header>
+        <nav class="section__container nav__container">
+            <div class="nav__logo">Aether<span>CARE</span></div>
+            <ul class="nav__links">
+                <li class="link"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="link"><a href="{{ url_for('about') }}">About Us</a></li>
+                <li class="link"><a href="#service">Services</a></li>
+                <li class="link"><a href="#pages">Pages</a></li>
+                <li class="link"><a href="{{ url_for('blog') }}">Blog</a></li>
+            </ul>
+            <button class="btn">Contact Us</button>
+        </nav>
+        <div class="section__container header__container" id="home">
+            <div class="header__content">
+                <h1>Explore Health Conditions – AetherCare Medical Knowledge Base</h1>
+                <p>📌 Chronic Diseases – Diabetes, Hypertension, Asthma</p>
+                <p>📌 Infectious Diseases – COVID-19, Flu, Tuberculosis</p>
+                <p>📌 Mental Health – Depression, Anxiety, PTSD</p>
+                <p>📌 Rare Conditions – Autoimmune Diseases, Genetic Disorders</p>
+                <h2 style="color: white;">Search for Diseases</h2>
+                <div class="search-container">
+                    <input type="text" id="searchBox" placeholder="Type to search..." onkeyup="searchFunction()">
+                    <div class="results" id="results"></div>
+                </div>
+            </div>
+            <button class="btn">See Services</button>
+        </div>
+    </header>
+
+    <!-- Blog Posts Section -->
+    <section class="section__container blog__container" id="blog">
+        <div class="section__header">Latest Health Insights</div>
+        <p>Stay informed with our expert articles on common and rare health conditions.</p>
+        <div class="blog__grid" id="blog-grid">
+            <div class="blog__card" id="diabetes-card">
+                <img src="{{ url_for('static', filename='images/blog/diabetes.jpg') }}" alt="Diabetes">
+                <div class="blog__content">
+                    <h4>Understanding Diabetes: Symptoms and Management</h4>
+                    <p>Learn about the early signs of diabetes, its types, and effective ways to manage it daily.</p>
+                    <a href="#" class="read-more" data-post="diabetes">Read More</a>
+                </div>
+            </div>
+            <div class="blog__card" id="hypertension-card">
+                <img src="{{ url_for('static', filename='images/blog/hypertension.jpg') }}" alt="Hypertension">
+                <div class="blog__content">
+                    <h4>Managing High Blood Pressure Naturally</h4>
+                    <p>Discover lifestyle changes and natural remedies to keep your blood pressure in check.</p>
+                    <a href="#" class="read-more" data-post="hypertension">Read More</a>
+                </div>
+            </div>
+            <div class="blog__card" id="asthma-card">
+                <img src="{{ url_for('static', filename='images/blog/asthma.jpg') }}" alt="Asthma">
+                <div class="blog__content">
+                    <h4>What Triggers Asthma and How to Control It</h4>
+                    <p>Explore common asthma triggers and strategies to breathe easier every day.</p>
+                    <a href="#" class="read-more" data-post="asthma">Read More</a>
+                </div>
+            </div>
+            <div class="blog__card" id="covid19-card">
+                <img src="{{ url_for('static', filename='images/blog/covid19.jpg') }}" alt="COVID-19">
+                <div class="blog__content">
+                    <h4>COVID-19: Updates and Prevention Tips</h4>
+                    <p>Stay updated on the latest COVID-19 insights and how to protect yourself.</p>
+                    <a href="#" class="read-more" data-post="covid19">Read More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for Blog Details -->
+    <div class="modal" id="blog-modal">
+        <div class="modal__content">
+            <span class="modal__close">×</span>
+            <div class="modal__body" id="modal-body">
+                <!-- Content will be populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="section__container footer__container">
+            <div class="footer__col">
+                <h3>Aether<span>CARE</span></h3>
+                <p>
+                    We are honored to be a part of your healthcare journey and committed
+                    to delivering compassionate, personalized, and top-notch care every
+                    step of the way.
+                </p>
+                <p>
+                    Trust us with your health, and let us work together to achieve the
+                    best possible outcomes for you and your loved ones.
+                </p>
+            </div>
+            <div class="footer__col">
+                <h4>About Us</h4>
+                <p>Home</p>
+                <p>About Us</p>
+                <p>Work With Us</p>
+                <p>Our Blog</p>
+                <p>Terms & Conditions</p>
+            </div>
+            <div class="footer__col">
+                <h4>Services</h4>
+                <p>Search Terms</p>
+                <p>Advance Search</p>
+                <p>Privacy Policy</p>
+                <p>Suppliers</p>
+                <p>Our Stores</p>
+            </div>
+            <div class="footer__col">
+                <h4>Contact Us</h4>
+                <p>
+                    <i class="ri-map-pin-2-fill"></i> ABESEC, Ghaziabad, U.P. 201009
+                </p>
+                <p><i class="ri-mail-fill"></i> aether@care.com</p>
+                <p><i class="ri-phone-fill"></i> +91 1234567898</p>
+            </div>
+        </div>
+        <div class="footer__bar">
+            <div class="footer__bar__content">
+                <p>Copyright © AetherCARE. All rights reserved.</p>
+                <div class="footer__socials">
+                    <span><i class="ri-instagram-line"></i></span>
+                    <span><i class="ri-facebook-fill"></i></span>
+                    <span><i class="ri-heart-fill"></i></span>
+                    <span><i class="ri-twitter-fill"></i></span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Define Blog Content with Resolved Paths -->
+    <script>
+        const blogContent = {
+            diabetes: {
+                title: "Understanding Diabetes: Symptoms and Management",
+                image: "{{ url_for('static', filename='images/blog/diabetes.jpg') }}",
+                content: `
+                    <h2>Understanding Diabetes: Symptoms and Management</h2>
+                    <p>Diabetes is a chronic condition where the body cannot properly process glucose due to insufficient insulin production or insulin resistance. There are two main types: Type 1, an autoimmune condition, and Type 2, often linked to lifestyle factors.</p>
+                    <h3>Early Signs</h3>
+                    <p>Symptoms include increased thirst, frequent urination, fatigue, blurred vision, and slow-healing wounds. Early detection is key to managing the condition effectively.</p>
+                    <h3>Management Tips</h3>
+                    <p>Maintain a balanced diet, exercise regularly, monitor blood sugar levels, and follow medical advice. For Type 2, weight management can significantly improve outcomes.</p>
+                `
+            },
+            hypertension: {
+                title: "Managing High Blood Pressure Naturally",
+                image: "{{ url_for('static', filename='images/blog/hypertension.jpg') }}",
+                content: `
+                    <h2>Managing High Blood Pressure Naturally</h2>
+                    <p>Hypertension, or high blood pressure, is a common condition that can lead to heart disease if unmanaged. It’s often called the "silent killer" due to its lack of obvious symptoms.</p>
+                    <h3>Natural Remedies</h3>
+                    <p>Reduce salt intake, exercise 30 minutes most days, manage stress with meditation or yoga, limit alcohol, and quit smoking. Maintaining a healthy weight is also crucial.</p>
+                    <h3>When to Seek Help</h3>
+                    <p>If lifestyle changes aren’t enough, consult a doctor for medication or further evaluation.</p>
+                `
+            },
+            asthma: {
+                title: "What Triggers Asthma and How to Control It",
+                image: "{{ url_for('static', filename='images/blog/asthma.jpg') }}",
+                content: `
+                    <h2>What Triggers Asthma and How to Control It</h2>
+                    <p>Asthma is a respiratory condition caused by inflammation of the airways, leading to breathing difficulties. Triggers vary by individual.</p>
+                    <h3>Common Triggers</h3>
+                    <p>Allergens like pollen, dust mites, pet dander, as well as cold air, exercise, and respiratory infections can provoke asthma attacks.</p>
+                    <h3>Control Strategies</h3>
+                    <p>Use prescribed inhalers, avoid known triggers, keep indoor air clean, and monitor symptoms with a peak flow meter.</p>
+                `
+            },
+            covid19: {
+                title: "COVID-19: Updates and Prevention Tips",
+                image: "{{ url_for('static', filename='images/blog/covid19.jpg') }}",
+                content: `
+                    <h2>COVID-19: Updates and Prevention Tips</h2>
+                    <p>COVID-19, caused by the SARS-CoV-2 virus, remains a global health concern with evolving variants. Staying informed is essential.</p>
+                    <h3>Latest Updates</h3>
+                    <p>Vaccines and boosters continue to reduce severity, though transmission persists. New strains may affect symptoms like fatigue and sore throat.</p>
+                    <h3>Prevention Tips</h3>
+                    <p>Wear masks in crowded areas, wash hands frequently, maintain distance, and stay vaccinated.</p>
+                `
+            }
+        };
+    </script>
+
+    <!-- Load External JS -->
+    <script src="{{ url_for('static', filename='js/blog.js') }}" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+model/llama-2-7b-chat.ggmlv3.q4_0.bin
+research/Ground.ipynb
+research/test_helper.py
+research/test_llm.py
+research/testing.ipynb
+research/__pycache__/helper.cpython-38.pyc
+.env

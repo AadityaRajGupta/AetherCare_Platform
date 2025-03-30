@@ -1,312 +1,243 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "home.html" %}
+{% block title %} AetherCare - Symptom Prediction {% endblock title %}
+{% block css %} {{super()}} {% endblock css %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
-    <title>AetherCare - Symptom Prediction</title>
-</head>
+{% block nav_bar %} {{super()}} {% endblock nav_bar %}
+{% block header_content %} 
+<div class="section__container header__container" id="home">
+    <div class="header__content">
+        <h1>AI Symptom Checker – Know What’s Wrong</h1>
+        <h4>Enter Your Symptoms – Get AI-Powered Health Insights</h4>
+        <p>
+            Describe how you’re feeling, and our AI system will 
+            analyze your symptoms to suggest possible conditions.
+        </p>
+        <button class="btn">See Services</button>
+    </div>
+</div>
+{% endblock header_content %}
 
-<body>
-    <!-- Header Section -->
-    <header>
-        <nav class="section__container nav__container">
-            <div class="nav__logo">Symptom<span>PREDICTION</span></div>
-            <ul class="nav__links">
-                <li class="link"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="link"><a href="{{ url_for('about') }}">About Us</a></li>
-                <li class="link"><a href="#service">Services</a></li>
-                <li class="link"><a href="#pages">Pages</a></li>
-                <li class="link"><a href="{{ url_for('blog') }}">Blog</a></li>
-            </ul>
-            <button class="btn">Contact Us</button>
-        </nav>
-        <div class="section__container header__container" id="home">
-            <div class="header__content">
-                <h1>AI Symptom Checker – Know What’s Wrong</h1>
-                <h4>Enter Your Symptoms – Get AI-Powered Health Insights</h4>
-                <p>
-                    Describe how you’re feeling, and our AI system will 
-                    analyze your symptoms to suggest possible conditions.
-                </p>
-                <button class="btn">See Services</button>
+{% block content %}
+<!-- Symptom Checker Section -->
+<section class="section__container symptom__container">
+    <div class="section__header">Symptom Checker</div>
+    <div class="symptom__form__container">
+        <form action="{{ url_for('predict') }}" method="post">
+            <div class="symptom__input__group">
+                <label for="symptoms">Enter Symptoms (comma-separated):</label>
+                <input type="text" id="symptoms" name="symptoms" 
+                       placeholder="e.g., itching, fever, cough" 
+                       class="symptom__input" autocomplete="off" 
+                       value="{{ user_input if user_input else '' }}">
+                <div id="suggestions" class="suggestions"></div>
             </div>
-        </div>
-    </header>
+            <button type="button" id="startSpeechRecognition" 
+                    class="btn symptom__speech__btn">Start Speech Recognition</button>
+            <div id="transcription" class="symptom__transcription">
+                {% if transcription %}{{ transcription }}{% endif %}
+            </div>
+            {% if message %}
+                <p class="symptom__message">{{ message }}</p>
+            {% endif %}
+            <button type="submit" class="btn symptom__predict__btn">Predict</button>
+        </form>
+    </div>
+</section>
 
-    <!-- Symptom Checker Section -->
-    <section class="section__container symptom__container">
-        <div class="section__header">Symptom Checker</div>
-        <div class="symptom__form__container">
-            <form action="{{ url_for('predict') }}" method="post">
-                <div class="symptom__input__group">
-                    <label for="symptoms">Enter Symptoms (comma-separated):</label>
-                    <input type="text" id="symptoms" name="symptoms" 
-                           placeholder="e.g., itching, fever, cough" 
-                           class="symptom__input" autocomplete="off" 
-                           value="{{ user_input if user_input else '' }}">
-                    <div id="suggestions" class="suggestions"></div>
-                </div>
-                <button type="button" id="startSpeechRecognition" 
-                        class="btn symptom__speech__btn">Start Speech Recognition</button>
-                <div id="transcription" class="symptom__transcription">
-                    {% if transcription %}{{ transcription }}{% endif %}
-                </div>
-                {% if message %}
-                    <p class="symptom__message">{{ message }}</p>
+<!-- Results Section (Shown only if prediction exists) -->
+{% if predicted_disease %}
+<section class="section__container result__container">
+    <div class="section__header">Our AI System Results</div>
+    <div class="result__input">
+        <h3>Your Symptoms</h3>
+        <p>{{ user_input|safe }}</p>
+    </div>
+    <div class="result__grid">
+        <!-- Left Sidebar with Buttons -->
+        <div class="result__sidebar">
+            <button class="btn result__btn active" data-target="diseaseContent">Disease</button>
+            <button class="btn result__btn" data-target="descriptionContent">Description</button>
+            <button class="btn result__btn" data-target="precautionContent">Precautions</button>
+            <button class="btn result__btn" data-target="medicationsContent">Medications</button>
+            <button class="btn result__btn" data-target="workoutsContent">Workouts</button>
+            <button class="btn result__btn" data-target="dietsContent">Diets</button>
+        </div>
+
+        <!-- Right Content Area -->
+        <div class="result__details">
+            <div id="diseaseContent" class="result__content" style="display: block;">
+                <h3>Predicted Disease</h3>
+                <p>{{ predicted_disease|safe }}</p>
+            </div>
+            <div id="descriptionContent" class="result__content">
+                <h3>Description</h3>
+                <p>{{ dis_des|safe }}</p>
+            </div>
+            <div id="precautionContent" class="result__content">
+                <h3>Precautions</h3>
+                {% if my_precautions %}
+                    <ul>
+                        {% for precaution in my_precautions %}
+                            <li>{{ precaution|safe }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No specific precautions available.</p>
                 {% endif %}
-                <button type="submit" class="btn symptom__predict__btn">Predict</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Results Section (Shown only if prediction exists) -->
-    {% if predicted_disease %}
-    <section class="section__container result__container">
-        <div class="section__header">Our AI System Results</div>
-        <div class="result__input">
-            <h3>Your Symptoms</h3>
-            <p>{{ user_input|safe }}</p>
-        </div>
-        <div class="result__grid">
-            <!-- Left Sidebar with Buttons -->
-            <div class="result__sidebar">
-                <button class="btn result__btn active" data-target="diseaseContent">Disease</button>
-                <button class="btn result__btn" data-target="descriptionContent">Description</button>
-                <button class="btn result__btn" data-target="precautionContent">Precautions</button>
-                <button class="btn result__btn" data-target="medicationsContent">Medications</button>
-                <button class="btn result__btn" data-target="workoutsContent">Workouts</button>
-                <button class="btn result__btn" data-target="dietsContent">Diets</button>
             </div>
-
-            <!-- Right Content Area -->
-            <div class="result__details">
-                <div id="diseaseContent" class="result__content" style="display: block;">
-                    <h3>Predicted Disease</h3>
-                    <p>{{ predicted_disease|safe }}</p>
-                </div>
-                <div id="descriptionContent" class="result__content">
-                    <h3>Description</h3>
-                    <p>{{ dis_des|safe }}</p>
-                </div>
-                <div id="precautionContent" class="result__content">
-                    <h3>Precautions</h3>
-                    {% if my_precautions %}
-                        <ul>
-                            {% for precaution in my_precautions %}
-                                <li>{{ precaution|safe }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No specific precautions available.</p>
-                    {% endif %}
-                </div>
-                <div id="medicationsContent" class="result__content">
-                    <h3>Medications</h3>
-                    {% if medications %}
-                        <ul>
-                            {% for medication in medications %}
-                                <li>{{ medication|safe }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No specific medications available.</p>
-                    {% endif %}
-                </div>
-                <div id="workoutsContent" class="result__content">
-                    <h3>Workouts</h3>
-                    {% if workout %}
-                        <ul>
-                            {% for workout_item in workout %}
-                                <li>{{ workout_item|safe }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No specific workouts available.</p>
-                    {% endif %}
-                </div>
-                <div id="dietsContent" class="result__content">
-                    <h3>Diets</h3>
-                    {% if my_diet %}
-                        <ul>
-                            {% for diet in my_diet %}
-                                <li>{{ diet|safe }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No specific diets available.</p>
-                    {% endif %}
-                </div>
+            <div id="medicationsContent" class="result__content">
+                <h3>Medications</h3>
+                {% if medications %}
+                    <ul>
+                        {% for medication in medications %}
+                            <li>{{ medication|safe }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No specific medications available.</p>
+                {% endif %}
+            </div>
+            <div id="workoutsContent" class="result__content">
+                <h3>Workouts</h3>
+                {% if workout %}
+                    <ul>
+                        {% for workout_item in workout %}
+                            <li>{{ workout_item|safe }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No specific workouts available.</p>
+                {% endif %}
+            </div>
+            <div id="dietsContent" class="result__content">
+                <h3>Diets</h3>
+                {% if my_diet %}
+                    <ul>
+                        {% for diet in my_diet %}
+                            <li>{{ diet|safe }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No specific diets available.</p>
+                {% endif %}
             </div>
         </div>
-    </section>
-    {% endif %}
+    </div>
+</section>
+{% endif %}
 
-    <!-- Footer Section -->
-    <footer class="footer">
-        <div class="section__container footer__container">
-            <div class="footer__col">
-                <h3>Aether<span>CARE</span></h3>
-                <p>
-                    We are honored to be a part of your healthcare journey and committed
-                    to delivering compassionate, personalized, and top-notch care every
-                    step of the way.
-                </p>
-                <p>
-                    Trust us with your health, and let us work together to achieve the
-                    best possible outcomes for you and your loved ones.
-                </p>
-            </div>
-            <div class="footer__col">
-                <h4>About Us</h4>
-                <p>Home</p>
-                <p>About Us</p>
-                <p>Work With Us</p>
-                <p>Our Blog</p>
-                <p>Terms & Conditions</p>
-            </div>
-            <div class="footer__col">
-                <h4>Services</h4>
-                <p>Search Terms</p>
-                <p>Advance Search</p>
-                <p>Privacy Policy</p>
-                <p>Suppliers</p>
-                <p>Our Stores</p>
-            </div>
-            <div class="footer__col">
-                <h4>Contact Us</h4>
-                <p>
-                    <i class="ri-map-pin-2-fill"></i> ABESEC, Ghaziabad, U.P. 201009
-                </p>
-                <p><i class="ri-mail-fill"></i> aether@care.com</p>
-                <p><i class="ri-phone-fill"></i> +91 1234567898</p>
-            </div>
-        </div>
-        <div class="footer__bar">
-            <div class="footer__bar__content">
-                <p>Copyright © AetherCARE. All rights reserved.</p>
-                <div class="footer__socials">
-                    <span><i class="ri-instagram-line"></i></span>
-                    <span><i class="ri-facebook-fill"></i></span>
-                    <span><i class="ri-heart-fill"></i></span>
-                    <span><i class="ri-twitter-fill"></i></span>
-                </div>
-            </div>
-        </div>
-    </footer>
+{% endblock content %}
+{% block footer %} {{super()}} {% endblock footer %}
+{% block scripts %}
+<!-- JavaScript -->
+<script>
+    // Symptom Suggestions (Autocomplete)
+    const symptomsInput = document.getElementById('symptoms');
+    const suggestionsDiv = document.getElementById('suggestions');
+    const symptomList = {{ symptoms_dict.keys()|list|tojson|safe }};
 
-    <!-- JavaScript -->
-    <script>
-        // Symptom Suggestions (Autocomplete)
-        const symptomsInput = document.getElementById('symptoms');
-        const suggestionsDiv = document.getElementById('suggestions');
-        const symptomList = {{ symptoms_dict.keys()|list|tojson|safe }};
-
-        symptomsInput.addEventListener('input', function () {
-            const input = this.value.toLowerCase();
-            suggestionsDiv.innerHTML = '';
-            if (input) {
-                const currentWord = input.split(',').pop().trim();
-                const filteredSymptoms = symptomList.filter(symptom => 
-                    symptom.toLowerCase().startsWith(currentWord)
-                );
-                if (filteredSymptoms.length > 0) {
-                    suggestionsDiv.style.display = 'block';
-                    filteredSymptoms.forEach(symptom => {
-                        const div = document.createElement('div');
-                        div.textContent = symptom;
-                        div.classList.add('suggestion-item');
-                        div.addEventListener('click', () => {
-                            const symptoms = symptomsInput.value.split(',').slice(0, -1);
-                            symptoms.push(symptom);
-                            symptomsInput.value = symptoms.join(', ') + ', ';
-                            suggestionsDiv.style.display = 'none';
-                            symptomsInput.focus();
-                        });
-                        suggestionsDiv.appendChild(div);
+    symptomsInput.addEventListener('input', function () {
+        const input = this.value.toLowerCase();
+        suggestionsDiv.innerHTML = '';
+        if (input) {
+            const currentWord = input.split(',').pop().trim();
+            const filteredSymptoms = symptomList.filter(symptom => 
+                symptom.toLowerCase().startsWith(currentWord)
+            );
+            if (filteredSymptoms.length > 0) {
+                suggestionsDiv.style.display = 'block';
+                filteredSymptoms.forEach(symptom => {
+                    const div = document.createElement('div');
+                    div.textContent = symptom;
+                    div.classList.add('suggestion-item');
+                    div.addEventListener('click', () => {
+                        const symptoms = symptomsInput.value.split(',').slice(0, -1);
+                        symptoms.push(symptom);
+                        symptomsInput.value = symptoms.join(', ') + ', ';
+                        suggestionsDiv.style.display = 'none';
+                        symptomsInput.focus();
                     });
-                } else {
-                    suggestionsDiv.style.display = 'none';
-                }
-            } else {
-                suggestionsDiv.style.display = 'none';
-            }
-        });
-
-        // Hide suggestions when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!suggestionsDiv.contains(e.target) && e.target !== symptomsInput) {
-                suggestionsDiv.style.display = 'none';
-            }
-        });
-
-        // Speech Recognition
-        const startSpeechRecognitionButton = document.getElementById('startSpeechRecognition');
-        const transcriptionDiv = document.getElementById('transcription');
-
-        startSpeechRecognitionButton.addEventListener('click', startSpeechRecognition);
-
-        function startSpeechRecognition() {
-            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                recognition.lang = 'en-US';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
-                recognition.onresult = function (event) {
-                    const result = event.results[0][0].transcript;
-                    transcriptionDiv.textContent = result;
-                    symptomsInput.value = result;
-                };
-
-                recognition.onend = function () {
-                    console.log('Speech recognition ended.');
-                };
-
-                recognition.onerror = function (event) {
-                    console.error('Speech recognition error:', event.error);
-                    transcriptionDiv.textContent = 'Error occurred during speech recognition: ' + event.error;
-                };
-
-                recognition.start();
-            } else {
-                transcriptionDiv.textContent = 'Speech recognition is not supported in your browser.';
-            }
-        }
-
-        // Toggle Result Content
-        document.addEventListener('DOMContentLoaded', () => {
-            const buttons = document.querySelectorAll('.result__btn');
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.getAttribute('data-target');
-                    const content = document.getElementById(targetId);
-                    
-                    // Hide all contents and remove active class
-                    document.querySelectorAll('.result__content').forEach(c => {
-                        c.style.display = 'none';
-                    });
-                    document.querySelectorAll('.result__btn').forEach(b => {
-                        b.classList.remove('active');
-                    });
-
-                    // Show the clicked content and mark button as active
-                    content.style.display = 'block';
-                    button.classList.add('active');
+                    suggestionsDiv.appendChild(div);
                 });
-            });
-
-            // Ensure "Disease" is shown by default if results exist
-            const defaultButton = document.querySelector('.result__btn[data-target="diseaseContent"]');
-            const defaultContent = document.getElementById('diseaseContent');
-            if (defaultButton && defaultContent) {
-                defaultButton.classList.add('active');
-                defaultContent.style.display = 'block';
+            } else {
+                suggestionsDiv.style.display = 'none';
             }
-        });
-    </script>
-</body>
+        } else {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
 
-</html>
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!suggestionsDiv.contains(e.target) && e.target !== symptomsInput) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+
+    // Speech Recognition
+    const startSpeechRecognitionButton = document.getElementById('startSpeechRecognition');
+    const transcriptionDiv = document.getElementById('transcription');
+
+    startSpeechRecognitionButton.addEventListener('click', startSpeechRecognition);
+
+    function startSpeechRecognition() {
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = function (event) {
+                const result = event.results[0][0].transcript;
+                transcriptionDiv.textContent = result;
+                symptomsInput.value = result;
+            };
+
+            recognition.onend = function () {
+                console.log('Speech recognition ended.');
+            };
+
+            recognition.onerror = function (event) {
+                console.error('Speech recognition error:', event.error);
+                transcriptionDiv.textContent = 'Error occurred during speech recognition: ' + event.error;
+            };
+
+            recognition.start();
+        } else {
+            transcriptionDiv.textContent = 'Speech recognition is not supported in your browser.';
+        }
+    }
+
+    // Toggle Result Content
+    document.addEventListener('DOMContentLoaded', () => {
+        const buttons = document.querySelectorAll('.result__btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                const content = document.getElementById(targetId);
+                
+                // Hide all contents and remove active class
+                document.querySelectorAll('.result__content').forEach(c => {
+                    c.style.display = 'none';
+                });
+                document.querySelectorAll('.result__btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+
+                // Show the clicked content and mark button as active
+                content.style.display = 'block';
+                button.classList.add('active');
+            });
+        });
+
+        // Ensure "Disease" is shown by default if results exist
+        const defaultButton = document.querySelector('.result__btn[data-target="diseaseContent"]');
+        const defaultContent = document.getElementById('diseaseContent');
+        if (defaultButton && defaultContent) {
+            defaultButton.classList.add('active');
+            defaultContent.style.display = 'block';
+        }
+    });
+</script>
+
+{% endblock scripts %}

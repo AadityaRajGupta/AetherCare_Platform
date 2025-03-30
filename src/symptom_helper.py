@@ -3,7 +3,10 @@ import numpy as np
 import pandas as pd
 import pickle
 import os
-import ast  # Add this import for parsing stringified lists
+import ast
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import wordnet
 
 # Get the absolute path to the project root (where app.py is)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -68,46 +71,55 @@ diseases_list = {
     38: 'Urinary tract infection', 35: 'Psoriasis', 27: 'Impetigo'
 }
 
-# Helper function to get disease details (renamed to avoid conflict)
+# Synonym map for symptom variations
+symptom_synonyms = {
+    "tired": "fatigue",
+    "exhausted": "fatigue",
+    "fever": "high_fever",
+    "hot": "high_fever",
+    "coughing": "cough",
+    "sneezing": "continuous_sneezing",
+    "itch": "itching",
+    "scratchy": "itching",
+    "pain": "joint_pain",  # Default to joint_pain, context could refine this
+    "sore": "muscle_pain",
+    "head hurts": "headache",
+    "stomach ache": "stomach_pain",
+    "cold": "chills"
+}
+
+# Helper function to get disease details
 def get_disease_details(dis):
-    # Description
     desc = description[description['Disease'] == dis]['Description']
     desc = " ".join([w for w in desc])
 
-    # Precautions
     pre = precautions[precautions['Disease'] == dis][['Precaution_1', 'Precaution_2', 'Precaution_3', 'Precaution_4']]
     pre = [col for col in pre.values[0]] if not pre.empty else []
 
-    # Medications
     med = medications[medications['Disease'] == dis]['Medication']
     if not med.empty:
-        # If the first value is a stringified list, parse it
         med_value = med.values[0]
         if isinstance(med_value, str) and med_value.startswith('[') and med_value.endswith(']'):
-            med = ast.literal_eval(med_value)  # Safely convert stringified list to actual list
+            med = ast.literal_eval(med_value)
         else:
-            med = [med_value]  # Single value, wrap in list
+            med = [med_value]
     else:
         med = []
 
-    # Diets
     die = diets[diets['Disease'] == dis]['Diet']
     if not die.empty:
-        # If the first value is a stringified list, parse it
         die_value = die.values[0]
         if isinstance(die_value, str) and die_value.startswith('[') and die_value.endswith(']'):
-            die = ast.literal_eval(die_value)  # Safely convert stringified list to actual list
+            die = ast.literal_eval(die_value)
         else:
-            die = [die_value]  # Single value, wrap in list
+            die = [die_value]
     else:
         die = []
 
-    # Workouts
     wrkout = workout[workout['disease'] == dis]['workout']
     wrkout = [w for w in wrkout.values] if not wrkout.empty else []
 
     return desc, pre, med, die, wrkout
-
 
 # Model Prediction function
 def get_predicted_value(patient_symptoms):
@@ -116,3 +128,47 @@ def get_predicted_value(patient_symptoms):
         if item in symptoms_dict:
             input_vector[symptoms_dict[item]] = 1
     return diseases_list[svc.predict([input_vector])[0]]
+
+# NLP-based keyword extraction function
+def extract_keywords(spoken_text):
+    spoken_text_lower = spoken_text.lower()
+    tokens = word_tokenize(spoken_text_lower)
+    matched_symptoms = set()
+    symptom_keys = set(symptoms_dict.keys())
+
+    # Check full text for multi-word symptoms or synonyms
+    for synonym, symptom in symptom_synonyms.items():
+        if synonym in spoken_text_lower and symptom in symptom_keys:
+            matched_symptoms.add(symptom)
+
+    # Check individual tokens
+    for i, token in enumerate(tokens):
+        # Check synonyms
+        if token in symptom_synonyms:
+            mapped_symptom = symptom_synonyms[token]
+            if mapped_symptom in symptom_keys:
+                matched_symptoms.add(mapped_symptom)
+        # Check exact match after normalizing spaces to underscores
+        normalized_token = token.replace(' ', '_')
+        if normalized_token in symptom_keys:
+            matched_symptoms.add(normalized_token)
+        # Check multi-word symptoms by combining tokens
+        for j in range(i + 1, min(i + 3, len(tokens))):  # Look ahead up to 2 more words
+            phrase = ' '.join(tokens[i:j + 1])
+            normalized_phrase = phrase.replace(' ', '_')
+            if normalized_phrase in symptom_keys:
+                matched_symptoms.add(normalized_phrase)
+            if phrase in symptom_synonyms:
+                mapped_symptom = symptom_synonyms[phrase]
+                if mapped_symptom in symptom_keys:
+                    matched_symptoms.add(mapped_symptom)
+        # Check WordNet synonyms
+        for syn in wordnet.synsets(token):
+            for lemma in syn.lemmas():
+                lemma_name = lemma.name().replace(' ', '_')
+                if lemma_name in symptom_keys:
+                    matched_symptoms.add(lemma_name)
+                elif lemma_name in symptom_synonyms:
+                    matched_symptoms.add(symptom_synonyms[lemma_name])
+
+    return list(matched_symptoms)

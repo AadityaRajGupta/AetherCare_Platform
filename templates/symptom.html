@@ -1,6 +1,220 @@
 {% extends "home.html" %}
 {% block title %} AetherCare - Symptom Prediction {% endblock title %}
-{% block css %} {{super()}} {% endblock css %}
+{% block css %} 
+{{super()}}
+<style>
+    
+
+    /* Symptom Checker Container */
+    .symptom__container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .symptom__container:hover {
+        transform: translateY(-5px);
+    }
+
+    .symptom__form__container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* Input Group */
+    .symptom__input__group {
+        position: relative;
+    }
+
+    .symptom__input__group label {
+        font-size: 1.1rem;
+        color: var(--text-dark, #333);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .symptom__input {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .symptom__input:focus {
+        border-color: var(--primary-color, #1e88e5);
+        box-shadow: 0 0 8px rgba(30, 136, 229, 0.3);
+    }
+
+    .suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 10;
+        display: none;
+    }
+
+    .suggestion-item {
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .suggestion-item:hover {
+        background-color: #f0f4f8;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    .symptom__speech__btn.speech__inactive {
+        background-color: var(--primary-color, #1e88e5);
+        color: white;
+    }
+
+    .symptom__speech__btn.speech__active {
+        background-color: var(--secondary-color, #42a5f5);
+        animation: pulse 1.5s infinite;
+    }
+
+    .symptom__predict__btn {
+        background-color: #4caf50;
+        color: white;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .speech__icon {
+        margin-right: 0.5rem;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Transcription and Keywords */
+    .symptom__transcription, .symptom__keywords p {
+        font-size: 1rem;
+        color: var(--text-dark, #333);
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .symptom__keywords {
+        margin-top: 1rem;
+    }
+
+    .symptom__keywords h4 {
+        font-size: 1.1rem;
+        color: var(--primary-color, #1e88e5);
+        margin-bottom: 0.5rem;
+    }
+
+    .symptom__message {
+        color: #e53935;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    /* Results Section */
+    .result__container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .result__input {
+        margin-bottom: 1.5rem;
+    }
+
+    .result__input h3, .result__content h3 {
+        font-size: 1.5rem;
+        color: var(--primary-color, #1e88e5);
+        margin-bottom: 0.5rem;
+    }
+
+    .result__grid {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .result__sidebar {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .result__btn {
+        background-color: #e0e0e0;
+        color: #333;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+    }
+
+    .result__btn.active {
+        background-color: var(--primary-color, #1e88e5);
+        color: white;
+    }
+
+    .result__details {
+        flex: 3;
+    }
+
+    .result__content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .result__grid {
+            flex-direction: column;
+        }
+
+        .symptom__container, .result__container {
+            padding: 1.5rem;
+        }
+
+        .section__header {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock css %}
 
 {% block nav_bar %} {{super()}} {% endblock nav_bar %}
 {% block header_content %} 
@@ -18,7 +232,6 @@
 {% endblock header_content %}
 
 {% block content %}
-<!-- Symptom Checker Section -->
 <section class="section__container symptom__container">
     <div class="section__header">Symptom Checker</div>
     <div class="symptom__form__container">
@@ -32,9 +245,15 @@
                 <div id="suggestions" class="suggestions"></div>
             </div>
             <button type="button" id="startSpeechRecognition" 
-                    class="btn symptom__speech__btn">Start Speech Recognition</button>
+                    class="btn symptom__speech__btn speech__inactive">
+                <span class="speech__icon">🎤</span>Start Speech Recognition
+            </button>
             <div id="transcription" class="symptom__transcription">
                 {% if transcription %}{{ transcription }}{% endif %}
+            </div>
+            <div id="keywordsFetched" class="symptom__keywords">
+                <h4>Keywords Fetched:</h4>
+                <p id="keywordsList">No keywords fetched yet.</p>
             </div>
             {% if message %}
                 <p class="symptom__message">{{ message }}</p>
@@ -44,16 +263,14 @@
     </div>
 </section>
 
-<!-- Results Section (Shown only if prediction exists) -->
 {% if predicted_disease %}
 <section class="section__container result__container">
-    <div class="section__header">Our AI System Results</div>
+    <div class="section__header">Your Health Insights</div>
     <div class="result__input">
         <h3>Your Symptoms</h3>
         <p>{{ user_input|safe }}</p>
     </div>
     <div class="result__grid">
-        <!-- Left Sidebar with Buttons -->
         <div class="result__sidebar">
             <button class="btn result__btn active" data-target="diseaseContent">Disease</button>
             <button class="btn result__btn" data-target="descriptionContent">Description</button>
@@ -62,8 +279,6 @@
             <button class="btn result__btn" data-target="workoutsContent">Workouts</button>
             <button class="btn result__btn" data-target="dietsContent">Diets</button>
         </div>
-
-        <!-- Right Content Area -->
         <div class="result__details">
             <div id="diseaseContent" class="result__content" style="display: block;">
                 <h3>Predicted Disease</h3>
@@ -129,9 +344,7 @@
 {% endblock content %}
 {% block footer %} {{super()}} {% endblock footer %}
 {% block scripts %}
-<!-- JavaScript -->
 <script>
-    // Symptom Suggestions (Autocomplete)
     const symptomsInput = document.getElementById('symptoms');
     const suggestionsDiv = document.getElementById('suggestions');
     const symptomList = {{ symptoms_dict.keys()|list|tojson|safe }};
@@ -167,16 +380,15 @@
         }
     });
 
-    // Hide suggestions when clicking outside
     document.addEventListener('click', (e) => {
         if (!suggestionsDiv.contains(e.target) && e.target !== symptomsInput) {
             suggestionsDiv.style.display = 'none';
         }
     });
 
-    // Speech Recognition
     const startSpeechRecognitionButton = document.getElementById('startSpeechRecognition');
     const transcriptionDiv = document.getElementById('transcription');
+    const keywordsList = document.getElementById('keywordsList');
 
     startSpeechRecognitionButton.addEventListener('click', startSpeechRecognition);
 
@@ -187,28 +399,67 @@
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
+            startSpeechRecognitionButton.classList.remove('speech__inactive');
+            startSpeechRecognitionButton.classList.add('speech__active');
+            startSpeechRecognitionButton.innerHTML = '<span class="speech__icon">🎤</span>Listening...';
+
+            recognition.onstart = function () {
+                console.log('Speech recognition started.');
+                transcriptionDiv.textContent = 'Listening to your symptoms...';
+            };
+
             recognition.onresult = function (event) {
-                const result = event.results[0][0].transcript;
-                transcriptionDiv.textContent = result;
-                symptomsInput.value = result;
+                const spokenText = event.results[0][0].transcript;
+                transcriptionDiv.textContent = spokenText;
+                symptomsInput.value = spokenText;
+
+                fetch('/extract-keywords', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: spokenText })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const keywords = data.keywords;
+                    if (keywords.length > 0) {
+                        keywordsList.textContent = keywords.join(', ');
+                        symptomsInput.value = keywords.join(', ');
+                    } else {
+                        keywordsList.textContent = 'No matching symptoms found in your speech.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching keywords:', error);
+                    keywordsList.textContent = 'Error fetching keywords.';
+                });
             };
 
             recognition.onend = function () {
                 console.log('Speech recognition ended.');
+                startSpeechRecognitionButton.classList.remove('speech__active');
+                startSpeechRecognitionButton.classList.add('speech__inactive');
+                startSpeechRecognitionButton.innerHTML = '<span class="speech__icon">🎤</span>Start Speech Recognition';
+                if (!transcriptionDiv.textContent) {
+                    transcriptionDiv.textContent = 'Speech recognition stopped. Please try again.';
+                }
             };
 
             recognition.onerror = function (event) {
                 console.error('Speech recognition error:', event.error);
-                transcriptionDiv.textContent = 'Error occurred during speech recognition: ' + event.error;
+                transcriptionDiv.textContent = 'Error occurred: ' + event.error;
+                keywordsList.textContent = 'No keywords fetched due to error.';
+                startSpeechRecognitionButton.classList.remove('speech__active');
+                startSpeechRecognitionButton.classList.add('speech__inactive');
+                startSpeechRecognitionButton.innerHTML = '<span class="speech__icon">🎤</span>Start Speech Recognition';
             };
 
             recognition.start();
         } else {
             transcriptionDiv.textContent = 'Speech recognition is not supported in your browser.';
+            keywordsList.textContent = 'Speech not supported.';
         }
     }
-
-    // Toggle Result Content
+    
     document.addEventListener('DOMContentLoaded', () => {
         const buttons = document.querySelectorAll('.result__btn');
         buttons.forEach(button => {
@@ -216,7 +467,6 @@
                 const targetId = button.getAttribute('data-target');
                 const content = document.getElementById(targetId);
                 
-                // Hide all contents and remove active class
                 document.querySelectorAll('.result__content').forEach(c => {
                     c.style.display = 'none';
                 });
@@ -224,13 +474,11 @@
                     b.classList.remove('active');
                 });
 
-                // Show the clicked content and mark button as active
                 content.style.display = 'block';
                 button.classList.add('active');
             });
         });
 
-        // Ensure "Disease" is shown by default if results exist
         const defaultButton = document.querySelector('.result__btn[data-target="diseaseContent"]');
         const defaultContent = document.getElementById('diseaseContent');
         if (defaultButton && defaultContent) {
@@ -239,5 +487,4 @@
         }
     });
 </script>
-
 {% endblock scripts %}

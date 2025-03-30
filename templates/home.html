@@ -17,13 +17,28 @@
     <header>
         {% block nav_bar %}
         <nav class="section__container nav__container">
-            <div class="nav__logo">Aether<span>CARE</span></div>
+            <div class="nav__logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AetherCare Logo"
+                    class="nav__logo-img">
+                Aether<span>CARE</span>
+            </div>
+            <!-- <div class="nav__logo">Aether<span>CARE</span></div> -->
             <ul class="nav__links">
                 <li class="link"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="link"><a href="{{ url_for('about') }}">About Us</a></li>
-                <li class="link"><a href="#service">Services</a></li>
-                <li class="link"><a href="#pages">Pages</a></li>
+                
+                <!-- <li class="link"><a href="#service">Services</a></li> -->
+                <li class="link dropdown">
+                    <button class="dropdown__btn">Services</button>
+                    <div class="dropdown__content">
+                        <a href="{{ url_for('chatbot') }}">AI Driven Chatbot</a>
+                        <a href="{{ url_for('blog') }}">Medical Blog</a>
+                        <a href="{{ url_for('finder') }}">Hospital Finder</a>
+                        <a href="{{ url_for('symptom') }}">Symptom Based Disease Prediction</a>
+                    </div>
+                </li>
+                <!-- <li class="link"><a href="#pages">Pages</a></li> -->
                 <li class="link"><a href="{{ url_for('blog') }}">Blog</a></li>
+                <li class="link"><a href="{{ url_for('about') }}">About Us</a></li>
             </ul>
             <button class="btn">Contact Us</button>
         </nav>
@@ -38,7 +53,7 @@
                     patient-centered approach, we're dedicated to your well-being. Trust
                     us with your health and experience the difference.
                 </p>
-                <button class="btn">See Services</button>
+                <button class="redirect-btn btn">See Services</button>
             </div>
             <div class="header__form">
                 <form>
@@ -58,12 +73,12 @@
     <section class="section__container service__container" id="service">
         <div class="service__header">
             <div class="service__header__content">
-                <h2 class="section__header">Our Special service</h2>
+                <h2 class="section__header">Our Specialized Services</h2>
                 <p>
-                    AI Driven chatbot, Medical blog, Hospital Finder, Symptom Based Detector, Disease Prediction
+                    AI-Driven Chatbot, Medical Blog, Hospital Finder, Symptom-Based Detector, Disease Prediction.
                 </p>
             </div>
-            <button class="service__btn">Ask A Service</button>
+            <button class="service__btn" id="requestService">Request Assistance</button>
         </div>
         <div class="service__grid">
             <div class="service__card">
@@ -165,6 +180,16 @@
         </div>
     </section>
 
+    <!-- Custom Pop-up (Modern Modal) -->
+    <div class="custom-modal" id="customModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <h3>Need Assistance?</h3>
+            <p>Our AI assistant is here to help! Start a conversation now.</p>
+            <button onclick="redirectToChatbot()">Chat with AI</button>
+        </div>
+    </div>
+
     <!-- <section class="section__container doctors__container" id="pages">
       <div class="doctors__header">
         <div class="doctors__header__content">
@@ -240,19 +265,19 @@
             </div>
             <div class="footer__col">
                 <h4>About Us</h4>
-                <p>Home</p>
-                <p>About Us</p>
+                <p><a href="{{ url_for('index') }}">Home</a></p>
+                <p><a href="{{ url_for('about') }}">About Us</a></p>
                 <p>Work With Us</p>
-                <p>Our Blog</p>
+                <p><a href="{{ url_for('blog') }}">Our Blog</a></p>
                 <p>Terms & Conditions</p>
             </div>
             <div class="footer__col">
                 <h4>Services</h4>
-                <p>Search Terms</p>
-                <p>Advance Search</p>
+                <p><a href="{{ url_for('chatbot') }}">AI Driven Chatbot</a></p>
+                <p><a href="{{ url_for('blog') }}">Medical Blog</a></p>
+                <p><a href="{{ url_for('finder') }}">Hospital Finder</a></p>
+                <p><a href="{{ url_for('symptom') }}">Symptom Based Disease Prediction</a></p>
                 <p>Privacy Policy</p>
-                <p>Suppliers</p>
-                <p>Our Stores</p>
             </div>
             <div class="footer__col">
                 <h4>Contact Us</h4>
@@ -277,6 +302,26 @@
     </footer>
     {% endblock footer %}
     {% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector(".redirect-btn").addEventListener("click", function () {
+                document.getElementById("service").scrollIntoView({ behavior: "smooth" });
+            });
+        });
+        document.getElementById("requestService").addEventListener("click", function () {
+            document.getElementById("customModal").classList.add("show-modal");
+        });
+
+        // Function to Redirect to Chatbot
+        function redirectToChatbot() {
+            window.location.href = "{{ url_for('chatbot') }}";
+        }
+
+        // Function to Close Modal
+        function closeModal() {
+            document.getElementById("customModal").classList.remove("show-modal");
+        }
+    </script>
     {% endblock scripts %}
 </body>
 

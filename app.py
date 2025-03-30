@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify
 from src.helper import download_hugging_face_embeddings, custom_retrieval_qa
-from src.symptom_helper import symptoms_dict, get_predicted_value, get_disease_details  # Import required variables and functions
+from src.symptom_helper import symptoms_dict, get_predicted_value, get_disease_details, extract_keywords  # Import required variables and functions
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import CTransformers
 from langchain_pinecone import PineconeVectorStore
@@ -71,6 +71,18 @@ def predict():
                                symptoms_dict=symptoms_dict)  # Pass symptoms_dict for POST success
     
     return render_template('symptom.html', symptoms_dict=symptoms_dict)  # Pass symptoms_dict for GET
+
+# New Endpoint for Keyword Extraction
+@app.route('/extract-keywords', methods=['POST'])
+def extract_keywords_endpoint():
+    data = request.get_json()
+    spoken_text = data.get('text', '').strip()
+    if not spoken_text:
+        return jsonify({'keywords': [], 'error': 'No text provided'}), 400
+    
+    keywords = extract_keywords(spoken_text)
+    return jsonify({'keywords': keywords})
+
 
 # CHAT-BOT RELATED CODE HERE BELOW
 
